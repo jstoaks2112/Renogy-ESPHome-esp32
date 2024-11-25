@@ -1,0 +1,168 @@
+
+uart:
+  id: mod_uart
+  tx_pin: 17
+  rx_pin: 18
+  baud_rate: 9600
+
+modbus:
+  send_wait_time: 50ms
+  uart_id: mod_uart
+  id: mod_bus
+
+modbus_controller:
+  - id: renogy_wanderer
+    address: 0xFF
+    modbus_id: mod_bus
+    setup_priority: -10
+    update_interval: 10s
+
+
+#############################################   Renogy Modbus Registers   ##############
+
+  #Battery Capacity
+  - platform: modbus_controller
+    modbus_controller_id: renogy_wanderer
+    name: "Camper Battery Capacity"
+    id: camper_battery_capacity
+    register_type: holding
+    address: 0x100
+    unit_of_measurement: "%"
+    value_type: U_WORD
+  #Battery VOLTS
+  - platform: modbus_controller
+    modbus_controller_id: renogy_wanderer
+    name: "Camper Battery Volts"
+    id: camper_battery_volts
+    register_type: holding
+    address: 0x101
+    unit_of_measurement: "V"
+    value_type: U_WORD
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+  #Charging Amps
+  - platform: modbus_controller
+    modbus_controller_id: renogy_wanderer
+    name: "Camper Charging Amps"
+    id: camper_charge_amps
+    register_type: holding
+    address: 0x102
+    unit_of_measurement: "A"
+    value_type: U_WORD
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.01
+
+  #Solar VOLTS
+  - platform: modbus_controller
+    modbus_controller_id: renogy_wanderer
+    name: "Camper Solar Volts"
+    id: camper_solar_volts
+    register_type: holding
+    address: 0x107
+    unit_of_measurement: "V"
+    value_type: U_WORD
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+
+  #Panel Amps
+  - platform: modbus_controller
+    modbus_controller_id: renogy_wanderer
+    name: "Camper Solar Current"
+    id: camper_solar_current
+    register_type: holding
+    address: 0x108
+    unit_of_measurement: "A"
+    value_type: U_WORD
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.01
+  #Panel Watts
+  - platform: modbus_controller
+    modbus_controller_id: renogy_wanderer
+    name: "Camper Solar Watts"
+    id: camper_solar_watts
+    register_type: holding
+    address: 0x109
+    unit_of_measurement: "W"
+    value_type: U_WORD
+    accuracy_decimals: 1
+#    filters:
+#      - multiply: 0.1
+
+  - platform: modbus_controller
+    modbus_controller_id: renogy_wanderer
+    name: "Camper Solar Wh/Day"
+    id: camper_solar_Wh_day
+    register_type: holding
+    address: 0x112
+    unit_of_measurement: "W"
+    value_type: U_WORD
+    accuracy_decimals: 1
+#    filters:
+#      - multiply: 0.1
+
+  - platform: modbus_controller
+    modbus_controller_id: renogy_wanderer
+    name: "Camper Charge Ah/Day"
+    id: camper_chrge_Ah_day
+    register_type: holding
+    address: 0x113
+    unit_of_measurement: "A"
+    value_type: U_WORD
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+
+  - platform: modbus_controller
+    modbus_controller_id: renogy_wanderer
+    name: "Renogy MPPT Temperature"
+    id: camper_renogy_temp
+    register_type: holding
+    value_type: U_WORD
+    address: 0x103
+    unit_of_measurement: "°C"
+    device_class: temperature
+    lambda: |-
+      uint16_t value = (uint16_t)x;
+      return (value & 0xFF);
+
+  - platform: modbus_controller
+    modbus_controller_id: renogy_wanderer
+    name: "Battery Temperature"
+    id: camper_battery_temp
+    register_type: holding
+    address: 0x103
+    value_type: U_WORD
+    unit_of_measurement: "°C"
+    device_class: temperature
+    lambda: |-
+      uint16_t value = (uint16_t)x;
+      return (value >> 8);
+
+  - platform: modbus_controller
+    modbus_controller_id: renogy_wanderer
+    name: "Renogy Charging State"
+    id: camper_renogy_charge_state
+    register_type: holding
+    value_type: U_WORD
+    address: 0x120
+#    unit_of_measurement: "°C"
+#    device_class: temperature
+    lambda: |-
+      uint16_t value = (uint16_t)x;
+      return (value & 0xFF);
+
+  - platform: modbus_controller
+    modbus_controller_id: renogy_wanderer
+    name: "Renogy Controller Fault Codes Raw"
+    id: renogy_fault_codes_raw
+    register_type: holding
+    address: 0x121
+    value_type: U_DWORD  # Read 32-bit unsigned integer
+    unit_of_measurement: "Fault Code"
+    lambda: |-
+      // Process fault codes if necessary (return as is for now)
+      return x;
